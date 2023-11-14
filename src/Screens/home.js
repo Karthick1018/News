@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
     View,
     Text,
@@ -11,7 +11,8 @@ import {
     Linking,
     ToastAndroid,
     RefreshControl,
-    Animated
+    Animated,
+    Switch
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -20,11 +21,12 @@ import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from "react-native-vector-icons//MaterialCommunityIcons";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import Share from 'react-native-share';
-import { Searchbar } from 'react-native-paper';
+import { Searchbar, ToggleButton } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import Entypop from "react-native-vector-icons/Entypo";
-
+import { EventRegister } from 'react-native-event-listeners';
+import themeContext from '../config/themecontext';
 
 const Home = () => {
     const [newsData, setNewsData] = useState([]);
@@ -37,6 +39,10 @@ const Home = () => {
     const [filteredData, setFilteredData] = useState([]);
     const [isIndiaSelected, setIsIndiaSelected] = useState(false);
     const [isCategorySelected, setIsCategorySelected] = useState(false);
+    const [isLifeSelected, setIsLifeSelected] = useState(false);
+    const [mode, setMode] = useState(false);
+
+    const theme = useContext(themeContext)
 
     const [fadeAnim] = useState(new Animated.Value(0));
 
@@ -73,6 +79,9 @@ const Home = () => {
     }
     const handleCategoryClick = () => {
         setIsCategorySelected(!isCategorySelected);
+    }
+    const handleLifeoryClick = () => {
+        setIsLifeSelected(!isLifeSelected);
     }
 
     const handleCategorySelect = (category) => {
@@ -174,16 +183,16 @@ const Home = () => {
 
     const renderItem = ({ item, index }) => (
         <TouchableOpacity
-            style={styles.card}
+            style={{ ...styles.card, backgroundColor: theme.cardcolor }}
             onPress={() => handleCardPress(item)}>
             {/* <LinearGradient
                 colors={['#A9F1DF', '#FFBBBB']}
                 style={{ borderRadius: 10, flex: 1, padding: '3%' }}> */}
-            <Text style={styles.title} numberOfLines={1}>
+            <Text style={{ ...styles.title, color: theme.color }} numberOfLines={1}>
                 {searchQuery ? item.title : item.title}
             </Text>
             <Text
-                style={styles.date}>
+                style={{ ...styles.date, color: theme.color }}>
                 Date:  {item.publishedAt.substring(0, 10)}    Time : {item.publishedAt.substring(12, 16)} am
             </Text>
             <Image
@@ -191,13 +200,13 @@ const Home = () => {
                 style={styles.image}
             />
             <Text
-                style={styles.description} numberOfLines={2}>
+                style={{ ...styles.description, color: theme.color }} numberOfLines={2}>
                 {item.description}
             </Text>
             <TouchableOpacity
                 onPress={() => Linking.openURL(item.url)}>
                 <Text
-                    style={{ color: '#075af2', marginTop: '2%' }}>
+                    style={{ color: '#075af2', marginTop: '2%' }} numberOfLines={1}>
                     {item.url}
                 </Text>
                 <View
@@ -205,19 +214,19 @@ const Home = () => {
                     <TouchableOpacity
                         style={{ right: '80%' }}
                         onPress={() => handleShare(item)}>
-                        <Icon name="share" size={20} color="blue" />
+                        <Icon name="share" size={20} color={theme.color} />
                     </TouchableOpacity>
                     <TouchableOpacity>
                         <Icon
                             name={savedItems[index] ? "heart" : "heart-o"}
                             size={20}
-                            color={savedItems[index] ? "red" : "#000000"}
+                            color={savedItems[index] ? "red" : theme.color}
                             onPress={() => handleSave(index)}
                         />
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={{ left: '40%' }}>
-                        <Entypo name="dots-three-vertical" size={20} color="#000000" />
+                        <Entypo name="dots-three-vertical" size={20} color={theme.color} />
                     </TouchableOpacity>
                 </View>
             </TouchableOpacity>
@@ -227,7 +236,7 @@ const Home = () => {
 
     return (
         <SafeAreaView
-            style={styles.container}>
+            style={{ ...styles.container, backgroundColor: theme.background }}>
             {isDrawerOpen && (
                 <>
                     <TouchableOpacity
@@ -242,22 +251,35 @@ const Home = () => {
                                 <Text
                                     style={{
                                         fontSize: 20,
-                                        marginLeft: '20%',
+                                        marginLeft: '8%',
                                         fontWeight: 'bold',
                                         color: '#46b7f0',
                                         top: '3%'
                                     }}>
                                     aaludra
                                 </Text>
+                                {/* <Text style={{marginLeft:'20%',bottom:'5%'}}>
+                                     Theme
+                                </Text> */}
+                                <Switch
+                                    value={mode}
+                                    onValueChange={(value) => {
+                                        setMode(value);
+                                        EventRegister.emit('changeTheme', value);
+                                    }}
+                                    trackColor={{ false: "#767577", true: "#000000" }}
+                                    thumbColor={mode ? "#FFFFFF" : "#000000"}
+                                    style={{ marginLeft: 'auto', marginRight: '5%' }}
+                                />
                             </View>
                             <Searchbar
                                 placeholder="Search"
                                 onChangeText={handleSearch}
                                 value={searchQuery}
-                                style={{ top: '8%' ,backgroundColor:'#FFFFFF',borderWidth:1,width:'80%',height:'45%',}}
+                                style={{ top: '8%', backgroundColor: '#FFFFFF', borderWidth: 1, width: '100%', height: '45%', }}
                             />
                         </View>
-                        <ScrollView >
+                        <ScrollView showsVerticalScrollIndicator={false} >
                             <TouchableOpacity
                                 style={{ marginTop: '5%' }}>
                                 <Text
@@ -272,15 +294,6 @@ const Home = () => {
                                 <Text
                                     style={styles.drawertext}>
                                     Photos
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => handleCategorySelect("Videos")}
-                                style={{ flexDirection: 'row', marginTop: '10%' }}>
-                                <Icon name="video-camera" size={15} color="#a819a4" />
-                                <Text
-                                    style={styles.drawertext}>
-                                    Videos
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
@@ -311,25 +324,14 @@ const Home = () => {
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                onPress={() => handleCategorySelect("Sports")}
-                                style={{ flexDirection: 'row', marginTop: '10%' }}>
-                                <MaterialCommunityIcons name="cricket" size={15} color="#ee7df0" />
-                                <Text
-                                    style={styles.drawertext}>
-                                    Sports
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
                                 onPress={handleIndiaClick}
                                 style={{ marginTop: '10%', flexDirection: 'row' }}>
                                 <Ionicons name="flag" size={15} color="#5ce673" />
-
-                                {/* <LinearGradient colors={['green', 'white', 'orange']}> */}
                                 <Text
                                     style={{ color: '#000000', marginLeft: '8%' }}>
                                     India
                                 </Text>
-                                {/* </LinearGradient> */}
+                                <Entypop name="chevron-small-down" size={20} color="#000000" style={{ marginLeft: '60%' }} />
                             </TouchableOpacity>
                             <View
                                 style={{ flexDirection: 'row' }}>
@@ -389,15 +391,23 @@ const Home = () => {
                                 </TouchableOpacity>}
                             </View>
                             <TouchableOpacity
+                                onPress={() => handleCategorySelect("Sports")}
+                                style={{ flexDirection: 'row', marginTop: '10%' }}>
+                                <MaterialCommunityIcons name="cricket" size={15} color="#ee7df0" />
+                                <Text
+                                    style={styles.drawertext}>
+                                    Sports
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
                                 onPress={handleCategoryClick}
                                 style={{ marginTop: '10%', flexDirection: 'row' }}>
-                                {/* <LinearGradient colors={['red', 'blue']}> */}
                                 <MaterialIcons name='category' size={16} color="#4f75e0" />
                                 <Text
                                     style={{ color: '#000000', marginLeft: '7%' }}>
                                     Categories
                                 </Text>
-                                {/* </LinearGradient> */}
+                                <Entypop name="chevron-small-down" size={20} color="#000000" style={{ marginLeft: '45%' }} />
                             </TouchableOpacity>
                             <View
                                 style={{ flexDirection: 'row' }}>
@@ -410,7 +420,7 @@ const Home = () => {
                                     </Text>
                                 </TouchableOpacity>}
                                 {isCategorySelected && <TouchableOpacity
-                                    onPress={() => handleCategorySelect("political")}
+                                    onPress={() => handleCategorySelect("Political")}
                                     style={{ borderWidth: 1, width: '35%', marginTop: '3%', height: 25, borderRadius: 20, flexDirection: 'row', left: '5%', backgroundColor: selectedCategory === 'Political' ? '#f58727' : '#FFFFFF' }}>
                                     <Text
                                         style={{ left: '50%', top: '3%', color: selectedCategory === 'Political' ? '#FFFFFF' : '#000000' }}>
@@ -441,7 +451,7 @@ const Home = () => {
                                 style={{ flexDirection: 'row' }}>
                                 {isCategorySelected && <TouchableOpacity
                                     onPress={() => handleCategorySelect("City")}
-                                    style={{ borderWidth: 1, width: '30%', marginTop: '3%', height: 25, borderRadius: 20, flexDirection: 'row', backgroundColor: selectedCategory === 'City' ? '#f58727' : '#FFFFFF' }}>
+                                    style={{ borderWidth: 1, width: '25%', marginTop: '3%', height: 25, borderRadius: 20, flexDirection: 'row', backgroundColor: selectedCategory === 'City' ? '#f58727' : '#FFFFFF' }}>
                                     <Text
                                         style={{ left: '70%', top: '2%', color: selectedCategory === 'City' ? '#FFFFFF' : '#000000' }}>
                                         City
@@ -449,16 +459,97 @@ const Home = () => {
                                 </TouchableOpacity>}
                                 {isCategorySelected && <TouchableOpacity
                                     onPress={() => handleCategorySelect("Web Series")}
-                                    style={{ borderWidth: 1, width: '50%', marginTop: '3%', height: 25, borderRadius: 20, flexDirection: 'row', left: '5%', backgroundColor: selectedCategory === 'Web Series' ? '#f58727' : '#FFFFFF' }}>
+                                    style={{ borderWidth: 1, width: '45%', marginTop: '3%', height: 25, borderRadius: 20, flexDirection: 'row', left: '5%', backgroundColor: selectedCategory === 'Web Series' ? '#f58727' : '#FFFFFF' }}>
                                     <Text
                                         style={{ left: '90%', top: '3%', color: selectedCategory === 'Web Series' ? '#FFFFFF' : '#000000' }}>
                                         Web Series
                                     </Text>
                                 </TouchableOpacity>}
                             </View>
-
+                            <TouchableOpacity
+                                onPress={() => handleCategorySelect("Videos")}
+                                style={{ flexDirection: 'row', marginTop: '10%' }}>
+                                <Icon name="video-camera" size={15} color="#a819a4" />
+                                <Text
+                                    style={styles.drawertext}>
+                                    Videos
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={handleLifeoryClick}
+                                style={{ marginTop: '10%', flexDirection: 'row' }}>
+                                <MaterialIcons name='auto-fix-high' size={16} color="#4f75e0" />
+                                <Text
+                                    style={{ color: '#000000', marginLeft: '7%' }}>
+                                    Lifestyle
+                                </Text>
+                                <Entypo name="chevron-small-down" size={20} color="#000000" style={{ marginLeft: '52%' }} />
+                            </TouchableOpacity>
+                            <View
+                                style={{ flexDirection: 'row' }}>
+                                {isLifeSelected && <TouchableOpacity
+                                    onPress={() => handleCategorySelect("Books")}
+                                    style={{ borderWidth: 1, width: '30%', marginTop: '3%', height: 25, borderRadius: 20, flexDirection: 'row', backgroundColor: selectedCategory === 'Books' ? '#f58727' : '#FFFFFF' }}>
+                                    <Text
+                                        style={{ left: '50%', top: '3%', color: selectedCategory === 'Books' ? '#FFFFFF' : '#000000' }}>
+                                        Books
+                                    </Text>
+                                </TouchableOpacity>}
+                                {isLifeSelected && <TouchableOpacity
+                                    onPress={() => handleCategorySelect("Fashion")}
+                                    style={{ borderWidth: 1, width: '35%', marginTop: '3%', height: 25, borderRadius: 20, flexDirection: 'row', left: '5%', backgroundColor: selectedCategory === 'Fashion' ? '#f58727' : '#FFFFFF' }}>
+                                    <Text
+                                        style={{ left: '70%', top: '3%', color: selectedCategory === 'Fashion' ? '#FFFFFF' : '#000000' }}>
+                                        Fashion
+                                    </Text>
+                                </TouchableOpacity>}
+                            </View>
+                            <View
+                                style={{ flexDirection: 'row' }}>
+                                {isLifeSelected && <TouchableOpacity
+                                    onPress={() => handleCategorySelect("Food")}
+                                    style={{ borderWidth: 1, width: '45%', marginTop: '3%', height: 25, borderRadius: 20, flexDirection: 'row', backgroundColor: selectedCategory === 'Food' ? '#f58727' : '#FFFFFF' }}>
+                                    <Text
+                                        style={{ left: '80%', top: '2%', color: selectedCategory === 'Food' ? '#FFFFFF' : '#000000' }}>
+                                        Food News
+                                    </Text>
+                                </TouchableOpacity>}
+                                {isLifeSelected && <TouchableOpacity
+                                    onPress={() => handleCategorySelect("Travel")}
+                                    style={{ borderWidth: 1, width: '30%', marginTop: '3%', height: 25, borderRadius: 20, flexDirection: 'row', left: '5%', backgroundColor: selectedCategory === 'Travel' ? '#f58727' : '#FFFFFF' }}>
+                                    <Text
+                                        style={{ left: '60%', top: '3%', color: selectedCategory === 'Travel' ? '#FFFFFF' : '#000000' }}>
+                                        Travel
+                                    </Text>
+                                </TouchableOpacity>}
+                            </View>
+                            <View
+                                style={{ flexDirection: 'row' }}>
+                                {isLifeSelected && <TouchableOpacity
+                                    onPress={() => handleCategorySelect("Relationships")}
+                                    style={{ borderWidth: 1, width: '46%', marginTop: '3%', height: 25, borderRadius: 20, flexDirection: 'row', backgroundColor: selectedCategory === 'Relationships' ? '#f58727' : '#FFFFFF' }}>
+                                    <Text
+                                        style={{ left: '70%', top: '2%', color: selectedCategory === 'Relationships' ? '#FFFFFF' : '#000000' }}>
+                                        Relationships
+                                    </Text>
+                                </TouchableOpacity>}
+                                {isLifeSelected && <TouchableOpacity
+                                    onPress={() => handleCategorySelect("Health")}
+                                    style={{ borderWidth: 1, width: '35%', marginTop: '3%', height: 25, borderRadius: 20, flexDirection: 'row', left: '5%', backgroundColor: selectedCategory === 'Health' ? '#f58727' : '#FFFFFF' }}>
+                                    <Text
+                                        style={{ left: '90%', top: '3%', color: selectedCategory === 'Health' ? '#FFFFFF' : '#000000' }}>
+                                        Health
+                                    </Text>
+                                </TouchableOpacity>}
+                            </View>
                         </ScrollView>
-                        <View style={{ flexDirection: 'row', height: '5%' }}>
+                        <View
+                            style={{ flexDirection: 'row', height: '5%' }}>
+                            <TouchableOpacity
+                                style={{ marginLeft: '10%', top: '5%' }}
+                                onPress={() => Linking.openURL('https://www.gmail.com')}>
+                                <Entypop name="mail" size={25} color="#f20a29" />
+                            </TouchableOpacity>
                             <TouchableOpacity
                                 style={{ marginLeft: '10%', top: '5%' }}
                                 onPress={() => Linking.openURL('https://www.facebook.com')}>
@@ -473,11 +564,6 @@ const Home = () => {
                                 style={{ marginLeft: '10%', top: '5%' }}
                                 onPress={() => Linking.openURL('https://www.youtube.com')}>
                                 <Entypop name="youtube" size={25} color="#f20a29" />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={{ marginLeft: '10%', top: '5%' }}
-                                onPress={() => Linking.openURL('https://www.gmail.com')}>
-                                <Entypop name="mail" size={25} color="#f20a29" />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -501,13 +587,13 @@ const Home = () => {
                     atNews
                 </Animated.Text>
 
-                {/* <Text style={{ marginTop: '12%', right: '60%' }}>
+                {/* <Text style={{ marginTop: '15%', right: '60%' }}>
                     powered by
                 </Text>
-                <TouchableOpacity style={{ marginTop: '16%', right: '80%' }}
+                <TouchableOpacity style={{ marginTop: '18%', right: '80%' }}
                     onPress={() => Linking.openURL('https://www.instagram.com/')} >
                     <Text style={{ fontWeight: 'bold' }}>
-                        ATS
+                        Karthi
                     </Text>
                 </TouchableOpacity> */}
             </View>
@@ -516,13 +602,12 @@ const Home = () => {
                 <TouchableOpacity
                     style={styles.headertextview}
                     onPress={() => handleButtonPress("Menu")}>
-                    <MaterialCommunityIcons name="menu" size={20} style={{ top: '30%' }} />
+                    <MaterialCommunityIcons name="menu" size={20} style={{ top: '30%', color: theme.color }} />
                 </TouchableOpacity>
                 <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ width: '180%' }}>
-
+                    contentContainerStyle={{ width: '190%' }}>
                     <TouchableOpacity
                         style={styles.headertextview}
                         onPress={() => {
@@ -530,7 +615,7 @@ const Home = () => {
                             handleButtonPress('Trending');
                         }}>
                         <Text
-                            style={[styles.headertest, buttonStyle("Trending")]}>
+                            style={[styles.headertest, buttonStyle("Trending"), { color: theme.color }]}>
                             Trending
                         </Text>
                     </TouchableOpacity>
@@ -541,7 +626,7 @@ const Home = () => {
                             handleButtonPress('Breaking News')
                         }}>
                         <Text
-                            style={[styles.headertest, buttonStyle("Breaking News")]}>
+                            style={[styles.headertest, buttonStyle("Trending"), { color: theme.color }]}>
                             Breaking News
                         </Text>
                     </TouchableOpacity>
@@ -552,7 +637,7 @@ const Home = () => {
                             handleButtonPress('*Live News')
                         }}>
                         <Text
-                            style={[styles.headertest, buttonStyle("*Live News")]}>
+                            style={[styles.headertest, buttonStyle("Trending"), { color: theme.color }]}>
                             Live News
                         </Text>
                     </TouchableOpacity>
@@ -563,7 +648,7 @@ const Home = () => {
                             handleButtonPress('#WorldCup');
                         }}>
                         <Text
-                            style={[styles.headertest, buttonStyle("#WorldCup")]}>
+                            style={[styles.headertest, buttonStyle("Trending"), { color: theme.color }]}>
                             #World Cup
                         </Text>
                     </TouchableOpacity>
@@ -574,7 +659,7 @@ const Home = () => {
                             handleButtonPress('Photos');
                         }}>
                         <Text
-                            style={[styles.headertest, buttonStyle("Photos")]}>
+                            style={[styles.headertest, buttonStyle("Trending"), { color: theme.color }]}>
                             Photos
                         </Text>
                     </TouchableOpacity>
@@ -583,9 +668,10 @@ const Home = () => {
                         onPress={() => {
                             handleCategorySelect("Videos");
                             handleButtonPress('Videos');
-                        }}>
+                        }}
+                    >
                         <Text
-                            style={[styles.headertest, buttonStyle("Videos")]}>
+                            style={[styles.headertest, buttonStyle("Trending"), { color: theme.color }]}>
                             Videos
                         </Text>
                     </TouchableOpacity>
@@ -596,7 +682,7 @@ const Home = () => {
                             handleButtonPress('Movies');
                         }}>
                         <Text
-                            style={[styles.headertest, buttonStyle("Movies")]}>
+                            style={[styles.headertest, buttonStyle("Trending"), { color: theme.color }]}>
                             Movies
                         </Text>
                     </TouchableOpacity>
@@ -617,30 +703,31 @@ const Home = () => {
                 />
             </View>
             <View
-                style={{ flexDirection: 'row', height: '15%' }}>
+                style={{ flexDirection: 'row', height: '10%', bottom: 155 }}>
                 <TouchableOpacity
-                    style={{ bottom: '42%', marginLeft: '10%' }}>
+                    style={{ marginLeft: '10%' }}>
                     <AntDesign name="home" size={25} color="#1cafed" />
                     <Text
-                        style={{ fontSize: 12, fontWeight: 'bold', color: '#000000', right: '5%' }}>
+                        style={{ fontSize: 12, fontWeight: 'bold', color: theme.color, right: '5%' }}>
                         Home
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={{ bottom: '42%', marginLeft: '25%' }}
-                    onPress={Settings}>
+                    style={{ marginLeft: '28%' }}
+                // onPress={Settings}
+                >
                     <AntDesign name="play" size={24} color="#1cafed" />
                     <Text
-                        style={{ fontSize: 12, fontWeight: 'bold', color: '#000000', right: '20%' }}>
+                        style={{ fontSize: 12, fontWeight: 'bold', color: theme.color, right: '20%' }}>
                         News
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={press}
-                    style={{ bottom: '42%', marginLeft: '25%' }}>
+                    style={{ marginLeft: '28%' }}>
                     <MaterialCommunityIcons name="account" size={25} color="#1cafed" />
                     <Text
-                        style={{ fontSize: 12, fontWeight: 'bold', color: '#000000', right: '10%' }}>
+                        style={{ fontSize: 12, fontWeight: 'bold', color: theme.color, right: '10%' }}>
                         Profile
                     </Text>
                 </TouchableOpacity>
@@ -690,13 +777,13 @@ const styles = StyleSheet.create({
     },
     headertest: {
         fontWeight: 'bold',
-        color: '#000000',
+        // color: theme.color,
         top: '30%'
     },
     drawer: {
         position: 'absolute',
         width: '70%',
-        height: 822,
+        height: 823,
         backgroundColor: '#FFFFFF',
         zIndex: 999,
         padding: 16,
@@ -706,10 +793,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         alignSelf: 'flex-end',
     },
-    closeButtonText: {
-        fontSize: 18,
-        color: 'blue',
-    },
+
     overlay: {
         ...StyleSheet.absoluteFillObject,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',

@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { StyleSheet, SafeAreaView, TouchableOpacity, View, Image, TextInput, Text, Linking } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { RadioButton } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native';
-import Entypop from "react-native-vector-icons/Entypo";
+import themeContext from '../config/themecontext';
 
 const Profile = () => {
     const [email, setEmail] = useState('');
@@ -11,6 +11,8 @@ const Profile = () => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [phoneNumberError, setPhoneNumberError] = useState('');
     const [checked, setChecked] = useState('male');
+
+    const theme = useContext(themeContext)
 
     const navigation = useNavigation();
 
@@ -40,10 +42,10 @@ const Profile = () => {
                 <TouchableOpacity
                     style={styles.backiconview}
                     onPress={() => { navigation.navigate('Home') }}>
-                    <Icon name="arrow-back" size={30} />
+                    <Icon name="arrow-back" size={30} color={theme.color} />
                 </TouchableOpacity>
                 <Text
-                    style={styles.headertext}>
+                    style={{ ...styles.headertext, color: theme.color }}>
                     Complete Your Profile
                 </Text>
             </View>
@@ -54,7 +56,7 @@ const Profile = () => {
                     style={styles.profileimage} />
                 <TouchableOpacity>
                     <Text
-                        style={styles.changetext}>
+                        style={{ ...styles.changetext, color: theme.color }}>
                         Change Profile
                     </Text>
                 </TouchableOpacity>
@@ -62,53 +64,56 @@ const Profile = () => {
             <View
                 style={styles.nameview}>
                 <Text
-                    style={styles.text}>
+                    style={{ ...styles.text, color: theme.color }}>
                     Name*
                 </Text>
                 <TextInput
-                    placeholder = "Name"
-                    style={{ borderBottomWidth: 1, borderBottomColor: '#000000', width: 330 }}
-                    />
+                    placeholder="Name"
+                    style={{ borderBottomWidth: 1, borderBottomColor: theme.color, width: 330, color: theme.color }}
+                    placeholderTextColor={theme.color}
+                />
             </View>
             <View
                 style={styles.emailinput}>
                 <Text
-                    style={styles.text}>
+                    style={{ ...styles.text, color: theme.color }}>
                     Email*
                 </Text>
                 <TextInput
                     placeholder="Email"
-                    style={{...styles.inputtext,borderBottomWidth: 1, borderBottomColor: '#000000', width: 330 }}
+                    placeholderTextColor={theme.color}
+                    style={{ ...styles.inputtext, borderBottomWidth: 1, borderBottomColor: theme.color, width: 330, color: theme.color }}
                     keyboardType="email-address"
                     onChangeText={handleEmailChange}
-                     />
+                />
                 <Text
-                    style={{ color: 'red' }}>
+                    style={{ color: theme.color }}>
                     {emailError}
                 </Text>
             </View>
             <View
                 style={styles.phoneinput}>
                 <Text
-                    style={styles.text}>
+                    style={{ ...styles.text, color: theme.color }}>
                     Phone Number*
                 </Text>
                 <TextInput
                     placeholder="+91  Phone Number"
+                    placeholderTextColor={theme.color}
                     secureTextEntry={true}
-                    style={{...styles.inputtext,borderBottomWidth: 1, borderBottomColor: '#000000', width: 330 }}
+                    style={{ ...styles.inputtext, borderBottomWidth: 1, borderBottomColor: theme.color, width: 330, color: theme.color }}
                     keyboardType="phone-pad"
                     onChangeText={handlePhoneNumberChange}
                 />
                 <Text
-                    style={{ color: 'red' }}>
+                    style={{ color: theme.color }}>
                     {phoneNumberError}
                 </Text>
             </View>
             <View
                 style={styles.radioButtonsContainer}>
                 <Text
-                    style={{ fontSize: 18, fontWeight: 'bold' }}>
+                    style={{ fontSize: 18, fontWeight: 'bold', color: theme.color }}>
                     Gender
                 </Text>
                 <RadioButton
@@ -117,7 +122,7 @@ const Profile = () => {
                     onPress={() => setChecked('male')}
                 />
                 <Text
-                    style={styles.radioText}>
+                    style={{ ...styles.radioText, color: theme.color }}>
                     Male
                 </Text>
                 <RadioButton
@@ -126,7 +131,7 @@ const Profile = () => {
                     onPress={() => setChecked('female')}
                 />
                 <Text
-                    style={styles.radioText}>
+                    style={{ ...styles.radioText, color: theme.color }}>
                     Female
                 </Text>
             </View>
